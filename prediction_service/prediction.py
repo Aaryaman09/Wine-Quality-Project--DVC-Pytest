@@ -9,18 +9,18 @@ class NotInRange(Exception):
         self.message = message
         super().__init__(self.message)
 
-class NotInCol(Exception):
+class NotInCols(Exception):
     def __init__(self, message = "Not in Columns"):
         self.message = message
         super().__init__(self.message)
 
-def read_params(config_path):
+def read_params(config_path = params_path):
     with open(config_path) as yaml_file:
         config = yaml.safe_load(yaml_file)
     return config
 
 def predict(data):
-    config = read_params(config_path = params_path)
+    config = read_params(params_path)
     model_dir_path = config['webapp_model_dir']
     model = joblib.load(model_dir_path)
     prediction = model.predict(data).tolist()[0]
@@ -42,7 +42,7 @@ def validate_input(dict_request):
         schema = get_schema()
         actual_cols = schema.keys()
         if col not in actual_cols:
-            raise NotInCol
+            raise NotInCols
     def _validate_values(col, val):
         schema = get_schema()
         if not (schema[col]['min'] <= float(dict_request[col]) <= schema[col]['max']):
@@ -61,10 +61,10 @@ def form_response(dict_request):
         response = predict(data)
         return response
     
-def api_response(dict_response):
+def api_response(dict_request):
     try:
-        if validate_input(dict_response):
-            data = np.array([list(dict_response.json.values())])
+        if validate_input(dict_request):
+            data = np.array([list(dict_request.values())])
             response = predict(data)
             response = {'response':response}
             return response
