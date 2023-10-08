@@ -8,5 +8,6 @@ flake8
 numpy
 flask
 gunicorn
+mlflow
 
 -e .
